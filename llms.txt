@@ -23,6 +23,6 @@ Snowflakings runs entirely in the browser. There is no account and no upload, an
 6. Trace the printed template onto the wedge, cut every red line, and unfold.
 
 ## Links
-- [Snowflakings app](https://snowflakings.com/): the designer
-- [Folding guide](https://snowflakings.com/#guide): step-by-step fold
-- [FAQ](https://snowflakings.com/#about): common questions
+- [Snowflakings app](https://www.snowflakings.com/): the designer
+- [Folding guide](https://www.snowflakings.com/#guide): step-by-step fold
+- [FAQ](https://www.snowflakings.com/#about): common questions
