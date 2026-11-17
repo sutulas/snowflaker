@@ -1,5 +1,5 @@
 /*
- * Snowflaker engine — geometry of the folded wedge and the "cut & unfold" simulation.
+ * Snowflakings engine — geometry of the folded wedge and the "cut & unfold" simulation.
  *
  * Model space: the folded paper is a 30° wedge with its point (the centre of the
  * original square) at the origin. Edge A runs straight up (+y), edge B sits 30°

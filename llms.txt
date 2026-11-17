@@ -1,8 +1,8 @@
-# Snowflaker
+# Snowflakings
 
-> Snowflaker is a free, browser-based paper snowflake designer. You draw cuts on a picture of folded paper (a square folded into a 30° wedge with 12 layers) and it instantly shows the unfolded six-point snowflake. It also makes word snowflakes and prints real-size cutting templates (PDF).
+> Snowflakings is a free, browser-based paper snowflake designer. You draw cuts on a picture of folded paper (a square folded into a 30° wedge with 12 layers) and it instantly shows the unfolded six-point snowflake. It also makes word snowflakes and prints real-size cutting templates (PDF).
 
-Snowflaker runs entirely in the browser. There is no account and no upload, and designs auto-save locally. It is useful for crafters, teachers, kids' activities, holiday decorations and anyone who wants to plan a paper snowflake before cutting.
+Snowflakings runs entirely in the browser. There is no account and no upload, and designs auto-save locally. It is useful for crafters, teachers, kids' activities, holiday decorations and anyone who wants to plan a paper snowflake before cutting.
 
 ## What it does
 - Draw freehand, straight-line and circle cuts on the folded wedge; every cut repeats 12 times with six-fold mirror symmetry.
@@ -23,6 +23,6 @@ Snowflaker runs entirely in the browser. There is no account and no upload, and 
 6. Trace the printed template onto the wedge, cut every red line, and unfold.
 
 ## Links
-- [Snowflaker app](https://snowflakings.com/): the designer
+- [Snowflakings app](https://snowflakings.com/): the designer
 - [Folding guide](https://snowflakings.com/#guide): step-by-step fold
 - [FAQ](https://snowflakings.com/#about): common questions

@@ -1,5 +1,5 @@
 /*
- * Snowflaker words — spell a word along a fold so it appears six times.
+ * Snowflakings words — spell a word along a fold so it appears six times.
  *
  * Only letters that are symmetric top-to-bottom work: we draw the TOP half of
  * each letter with its midline on fold edge A, and unfolding mirrors in the
@@ -239,15 +239,21 @@
     const d = slant >= 0.999 ? 0 : 0.6 * (1 / slant - 1);
     const at = (rho, th) => [rho * Math.sin(th), -d + rho * Math.cos(th)];
     // Inside the paper, clear of the trimmed edge, and a few degrees clear of fold B
-    const angleOk = p => Math.atan2(p[0], p[1]) <= E.WEDGE - ec.am;
+    const angleOk = p => Math.atan2(p[0], p[1]) <= E.WEDGE - ec.am + 1e-9;
     const ok = p => E.pointInPoly(p, outline) && distToTrim(p, outline) >= M && angleOk(p);
     const okOut = p => E.pointInPoly(p, outline) && distToTrim(p, outline) >= ec.margin && angleOk(p);
     const rayOk = (u, p) => (ec.edge && u < 1 ? angleOk(p) : ok(p));   // edge mode: trim may crop the first letter's frame
     const N = 10;
+    // At full slant the letters always fan out across the whole wedge: the angular
+    // scale `a` is pinned to the fold angle and only the shrink rate `c` is searched.
+    // (Below full slant the map stays conformal, a = c.)
+    const full = d === 0;
+    const aFull = (E.WEDGE - ec.am) / depth;
+    const angOf = c => (full ? aFull : c);
 
     // Largest start radius (around P) whose outer edge still fits on the paper
     const fitRho0 = c => {
-      const thOut = c * ec.vOut;
+      const thOut = angOf(c) * ec.vOut;
       const arcOk = rho => { for (let k = 1; k <= N; k++) if (!okOut(at(rho, (thOut * k) / N))) return false; return true; };
       // Walk inward from beyond the paper until the arc fits, then refine.
       let hi = d + 1.05, lo = 0;
@@ -258,7 +264,7 @@
       return lo * Math.exp(c * (ec.uOut + PAD));   // radius found is at u = uOut; convert to u = -PAD
     };
     const check = (c, needMin) => {
-      const thMax = c * depth;
+      const thMax = angOf(c) * depth;
       if (thMax >= E.WEDGE) return null;
       const rho0 = fitRho0(c);
       if (!rho0) return null;
@@ -266,7 +272,7 @@
       if (needMin && Math.hypot(...at(rho1, 0)) < RMIN) return null;               // keep a solid paper hub at the centre
       for (let k = 1; k <= N; k++) if (!ok(at(rho1, (thMax * k) / N))) return null;
       for (let j = 0; j <= 24; j++) if (!rayOk((span * j) / 24 - PAD, at(rho0 * Math.exp((-c * span * j) / 24), thMax))) return null;
-      if (needMin && c * rho0 * Math.exp(-c * (span - PAD)) < HMIN) return null;   // last letter big enough to cut
+      if (needMin && angOf(c) * rho0 * Math.exp(-c * (span - PAD)) < HMIN) return null;   // last letter big enough to cut
       return { c, rho0 };
     };
     const cMax = (E.WEDGE - ec.am) / depth;
@@ -274,13 +280,17 @@
     for (let i = 0; i < 240 && !best; i++) best = check(cMax * (1 - i / 240), true);
     if (!best) return null;
     let { c, rho0 } = best;
+    let a = angOf(c);
     if (scale < 1) {
-      c *= scale;
-      rho0 = fitRho0(c) || rho0;
+      c *= scale; a *= scale;
+      const thOut = a * ec.vOut;
+      const arcOk = rho => { for (let k = 1; k <= N; k++) if (!okOut(at(rho, (thOut * k) / N))) return false; return true; };
+      let r = d + 1.05; while (r > d + 0.02 && !arcOk(r)) r -= 0.005;
+      if (r > d + 0.02) rho0 = r * Math.exp(c * (ec.uOut + PAD));
     }
     return {
-      map: ([u, v]) => at(rho0 * Math.exp(-c * (u + PAD)), c * v),
-      halfHeightAt: u => c * rho0 * Math.exp(-c * (u + PAD)),
+      map: ([u, v]) => at(rho0 * Math.exp(-c * (u + PAD)), a * v),
+      halfHeightAt: u => a * rho0 * Math.exp(-c * (u + PAD)),
     };
   }
 
@@ -296,7 +306,7 @@
    */
   function layoutTapered(span, depth, outline, slant, scale, breaks, ec) {
     const d = slant >= 0.999 ? 0 : 0.6 * (1 / slant - 1);
-    const angleOk = p => Math.atan2(p[0], p[1]) <= E.WEDGE - ec.am;
+    const angleOk = p => Math.atan2(p[0], p[1]) <= E.WEDGE - ec.am + 1e-9;
     const ok = p => E.pointInPoly(p, outline) && distToTrim(p, outline) >= M && angleOk(p);
     const okOut = p => E.pointInPoly(p, outline) && distToTrim(p, outline) >= ec.margin && angleOk(p);
     const rayOk = (u, p) => (ec.edge && u < 1 ? angleOk(p) : ok(p));
@@ -312,7 +322,12 @@
       const t = (u - a) / (b - a);
       return 1 / (1 / law(a) + t * (1 / law(b) - 1 / law(a)));
     };
-    const at = (k, rho, v) => [k * v * rho, rho - d];
+    // At full slant the cap line always runs parallel to the other fold (spread
+    // pinned to the wedge); only the shrink rate k is searched. Below that, spread = k.
+    const full = d === 0;
+    const kFull = Math.tan(E.WEDGE - ec.am) / depth;
+    let spread = null;                                   // set after fitting when scale < 1
+    const at = (k, rho, v) => [(spread ?? (full ? kFull : k)) * v * rho, rho - d];
     const fitRho0 = k => {
       const edgeOk = r => { for (let j = 1; j <= N; j++) if (!okOut(at(k, r, (ec.vOut * j) / N))) return false; return true; };
       let hi = d + 1.05, lo = 0;
@@ -329,7 +344,7 @@
       for (let j = 1; j <= N; j++) if (!ok(at(k, rho1, (depth * j) / N))) return null;
       for (const u of cells) if (!rayOk(u, at(k, rhoAt(k, rho0, u), depth))) return null;
       if (needMin && rho1 - d < RMIN) return null;                                    // solid hub at the centre
-      if (needMin && k * rho0 * Math.exp(-k * (span - PAD)) < HMIN) return null;       // last letter big enough
+      if (needMin && (full ? kFull : k) * rho0 * Math.exp(-k * (span - PAD)) < HMIN) return null;       // last letter big enough
       return { k, rho0 };
     };
     const kMax = Math.tan(E.WEDGE - ec.am) / depth;
@@ -337,13 +352,16 @@
     for (let i = 0; i < 240 && !best; i++) best = check(kMax * (1 - i / 240), true);
     if (!best) return null;
     let { k, rho0 } = best;
+    let sp = full ? kFull : k;
     if (scale < 1) {
-      k *= scale;
+      k *= scale; sp *= scale;
+      spread = sp;
       rho0 = fitRho0(k) || rho0;
     }
+    spread = sp;
     return {
       map: ([u, v]) => at(k, rhoAt(k, rho0, u), v),
-      halfHeightAt: u => k * rhoAt(k, rho0, u),
+      halfHeightAt: u => sp * rhoAt(k, rho0, u),
     };
   }
 

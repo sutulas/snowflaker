@@ -1,5 +1,5 @@
 /*
- * Snowflaker editor — draw cuts on the folded wedge.
+ * Snowflakings editor — draw cuts on the folded wedge.
  * Renders into an <svg>; all geometry lives in model space (see engine.js).
  */
 (function (global) {

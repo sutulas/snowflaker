@@ -1,5 +1,5 @@
 /*
- * Snowflaker app — wires the editor, the unfold preview and all the extras.
+ * Snowflakings app — wires the editor, the unfold preview and all the extras.
  */
 (function () {
   'use strict';
@@ -430,11 +430,11 @@
     const fs = 0.022;
     const lw = u => (u / R).toFixed(5);            // line width in inches → model units
     const header = bare ? '' : `
-    <text x="${vx0 + 0.01}" y="${-vy1 + 0.035}" font-weight="700" fill="#111">Snowflaker template · ${label} square paper</text>
+    <text x="${vx0 + 0.01}" y="${-vy1 + 0.035}" font-weight="700" fill="#111">Snowflakings template · ${label} square paper</text>
     <text x="${vx0 + 0.01}" y="${-vy1 + 0.035 + fs * 1.4}">Black = trim across the top · Red = cuts · print at 100%</text>`;
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${(W * R).toFixed(3)}in" height="${(H * R).toFixed(3)}in" viewBox="${vx0} ${-vy1} ${W} ${H}">
-  <title>Snowflaker cutting template — ${label} square paper</title>
+  <title>Snowflakings cutting template — ${label} square paper</title>
   <defs><clipPath id="paper"><path d="${P(outline)} Z"/></clipPath></defs>
   <path d="${P(sector)} Z" fill="none" stroke="#9aa6b8" stroke-width="${lw(0.008)}" stroke-dasharray="${lw(0.06)} ${lw(0.04)}"/>
   <path d="${P(outline)} Z" fill="#fff" stroke="#111" stroke-width="${lw(0.014)}"/>
@@ -491,7 +491,7 @@
     <h1>Snowflake cutting template</h1>
     <div>For <b>${label}</b> square paper · ${trimName} outline · ${store.state.strokes.length} cuts through 12 layers</div>
     <ol>
-      <li>Fold your square: diagonal, in half, then in thirds (see Snowflaker’s guide).</li>
+      <li>Fold your square: diagonal, in half, then in thirds (see Snowflakings’s guide).</li>
       <li>Cut out the template along the <b>black</b> outline and lay it on the folded wedge. Put its point on the centre corner and line its edges up with the folds.</li>
       <li>Trace it, trim across the top along the black line, then cut every <b>red</b> line through all the layers.</li>
       <li>Unfold slowly. ❄</li>
@@ -530,7 +530,7 @@
   }
   function importProject(text) {
     const o = JSON.parse(text);
-    if (!Array.isArray(o.strokes) || !o.trim) throw new Error('That isn’t a Snowflaker project file.');
+    if (!Array.isArray(o.strokes) || !o.trim) throw new Error('That isn’t a Snowflakings project file.');
     store.keepSeeds = [];
     editor.selected.clear();
     store.commit(o.strokes, o.trim, Array.isArray(o.guides) ? o.guides : []);
