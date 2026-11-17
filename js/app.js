@@ -337,24 +337,27 @@
         const len = lens[idx];
         if (!len) return;
         const m = rootInv.multiply(shape.getScreenCTM());
+        // A filled shape (the SVG default) is cut out as a solid area; an unfilled one is just its outline
+        const cs = getComputedStyle(shape);
+        const filled = !/^(line|polyline)$/i.test(shape.tagName) && cs.fill !== 'none' && +cs.fillOpacity > 0 && +cs.opacity > 0;
         const n = Math.max(8, Math.min(1500, Math.ceil(len / step)));
         let cur = [], prevLocal = null;
         for (let i = 0; i <= n; i++) {
           const lp = shape.getPointAtLength((i / n) * len);
           if (prevLocal && Math.hypot(lp.x - prevLocal.x, lp.y - prevLocal.y) > (len / n) * 3) {
-            if (cur.length > 1) lines.push(cur);
+            if (cur.length > 1) lines.push({ pts: cur, filled });
             cur = [];
           }
           prevLocal = lp;
           const p = lp.matrixTransform(m);
           cur.push([p.x, p.y]);
         }
-        if (cur.length > 1) lines.push(cur);
+        if (cur.length > 1) lines.push({ pts: cur, filled });
       });
       if (!lines.length) throw new Error('Couldn’t find any drawable lines in that SVG.');
 
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-      for (const l of lines) for (const [x, y] of l) {
+      for (const l of lines) for (const [x, y] of l.pts) {
         x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
       }
       const w = Math.max(x1 - x0, 1e-6), h = Math.max(y1 - y0, 1e-6);
@@ -363,12 +366,13 @@
       const g = 'g' + Editor.newId();
       const tol = 0.0008;
       const strokes = lines.map(l => {
-        let pts = l.map(([x, y]) => [cx + (x - bx) * s, cy - (y - by) * s]);
+        let pts = l.pts.map(([x, y]) => [cx + (x - bx) * s, cy - (y - by) * s]);
         const a = pts[0], b = pts[pts.length - 1];
         const closed = Math.hypot(a[0] - b[0], a[1] - b[1]) < 0.004;
         pts = E.simplify(pts, tol);
         if (closed && pts.length > 2) pts.pop();
-        return { id: Editor.newId(), g, pts, closed: closed && pts.length > 2 };
+        const isClosed = closed && pts.length > 2;
+        return { id: Editor.newId(), g, pts, closed: isClosed, ...(isClosed && l.filled && editor.layer === 'cut' ? { fill: true } : {}) };
       }).filter(st => st.pts.length >= 2);
 
       editor.commitList([...editor.list, ...strokes]);
