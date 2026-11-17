@@ -1,0 +1,13 @@
+{
+  "name": "Snowflaker – Paper Snowflake Designer",
+  "short_name": "Snowflaker",
+  "description": "Design paper snowflakes on a folded wedge, preview the unfolded result, and print a cutting template.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#2f62c9",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

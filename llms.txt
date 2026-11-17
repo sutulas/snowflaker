@@ -1,0 +1,28 @@
+# Snowflaker
+
+> Snowflaker is a free, browser-based paper snowflake designer. You draw cuts on a picture of folded paper (a square folded into a 30° wedge with 12 layers) and it instantly shows the unfolded six-point snowflake. It also makes word snowflakes and prints real-size cutting templates (PDF).
+
+Snowflaker runs entirely in the browser. There is no account and no upload, and designs auto-save locally. It is useful for crafters, teachers, kids' activities, holiday decorations and anyone who wants to plan a paper snowflake before cutting.
+
+## What it does
+- Draw freehand, straight-line and circle cuts on the folded wedge; every cut repeats 12 times with six-fold mirror symmetry.
+- Live unfolded preview, including which pieces fall away (click a piece to keep it instead).
+- Sketch layer: plan guide lines first, then trace them into cuts.
+- Word cut-out: type up to 7 letters that are symmetric top-to-bottom (B, C, D, E, H, I, K, l, O, t, X). The word repeats around all six arms, from the tip (first letter) toward the centre (last letter). Options: slant the letters to follow the wedge (curved or straight-line), let the first letter form the snowflake's edge, or fill the arm's full width with a thin connecting bar.
+- Top trim shapes: flat (hexagon), point, star and round.
+- Import SVG cut lines; export PNG; export an SVG template.
+- Print / Save as PDF: a real-size cutting template for 6", 8.5", 10", 12", 15 cm or 20 cm paper, with a scale bar to check it printed at 100%.
+- Save design / Open design as a .json file.
+
+## How to fold paper for a six-point snowflake
+1. Fold a square sheet in half diagonally to make a triangle.
+2. Fold the triangle in half; the right-angle corner becomes the snowflake's centre.
+3. With the centre pointing down, divide the top into three equal 30° slices.
+4. Fold the right slice over the middle, then the left slice over the top.
+5. Cut straight across the uneven top (the "top trim").
+6. Trace the printed template onto the wedge, cut every red line, and unfold.
+
+## Links
+- [Snowflaker app](https://snowflaker.example/): the designer
+- [Folding guide](https://snowflaker.example/#guide): step-by-step fold
+- [FAQ](https://snowflaker.example/#about): common questions
