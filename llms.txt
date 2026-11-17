@@ -23,6 +23,6 @@ Snowflaker runs entirely in the browser. There is no account and no upload, and 
 6. Trace the printed template onto the wedge, cut every red line, and unfold.
 
 ## Links
-- [Snowflaker app](https://snowflaker.example/): the designer
-- [Folding guide](https://snowflaker.example/#guide): step-by-step fold
-- [FAQ](https://snowflaker.example/#about): common questions
+- [Snowflaker app](https://snowflaker.com/): the designer
+- [Folding guide](https://snowflaker.com/#guide): step-by-step fold
+- [FAQ](https://snowflaker.com/#about): common questions

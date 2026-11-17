@@ -305,96 +305,6 @@
     requestAnimationFrame(step);
   }
 
-  // ------------------------------------------------------------- generator
-  function rng(seed) {
-    let a = seed >>> 0;
-    return () => {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function generate(seed, trim) {
-    const R = rng(seed);
-    const rand = (a, b) => a + R() * (b - a);
-    const pick = arr => arr[Math.floor(R() * arr.length)];
-    const id = () => Editor.newId();
-    const strokes = [];
-    const outline = E.paperOutline(trim);
-    const spec = E.trimSpec(trim);
-    const lenA = spec.kind === 'arc' ? spec.r : spec.ra;
-    const lenB = spec.kind === 'arc' ? spec.r : spec.rb;
-    const edges = [
-      { u: [0, 1], n: [1, 0], len: lenA },
-      { u: E.UB, n: [-E.COS30, E.SIN30], len: lenB },
-    ];
-    const OUT = 0.02;
-
-    for (const edge of edges) {
-      const count = 2 + Math.floor(R() * 3);
-      const spots = [];
-      for (let c = 0; c < count; c++) spots.push(rand(0.22, edge.len - 0.07));
-      spots.sort((a, b) => a - b);
-      let prev = -1;
-      for (const t of spots) {
-        if (t - prev < 0.09) continue;
-        prev = t;
-        const halfW = rand(0.018, Math.min(0.06, t * 0.12));
-        const depth = rand(0.25, 0.42) * t * Math.tan(E.WEDGE);
-        const at = (s, dd) => [
-          (t + s) * edge.u[0] + dd * edge.n[0],
-          (t + s) * edge.u[1] + dd * edge.n[1],
-        ];
-        const kind = pick(['v', 'v', 'round', 'slot', 'tree']);
-        let pts;
-        if (kind === 'v') pts = [at(-halfW, -OUT), at(0, depth), at(halfW, -OUT)];
-        else if (kind === 'slot') pts = [at(-halfW * 0.5, -OUT), at(-halfW * 0.5, depth), at(halfW * 0.5, depth), at(halfW * 0.5, -OUT)];
-        else if (kind === 'tree') pts = [at(-halfW, -OUT), at(-halfW * 0.25, depth * 0.55), at(-halfW * 0.8, depth * 0.55), at(0, depth), at(halfW * 0.8, depth * 0.55), at(halfW * 0.25, depth * 0.55), at(halfW, -OUT)];
-        else {
-          pts = [at(-halfW, -OUT)];
-          for (let i = 0; i <= 16; i++) {
-            const a = Math.PI - (i / 16) * Math.PI;
-            pts.push(at(halfW * Math.cos(a), Math.max(0, Math.sin(a) * depth)));
-          }
-          pts.push(at(halfW, -OUT));
-        }
-        strokes.push({ id: id(), pts, closed: false });
-      }
-    }
-
-    // Interior holes
-    const holes = 1 + Math.floor(R() * 3);
-    for (let h = 0; h < holes; h++) {
-      const r = rand(0.3, 0.85) * Math.min(lenA, lenB);
-      const phi = rand(0.3, 0.7) * E.WEDGE;
-      const c = [r * Math.sin(phi), r * Math.cos(phi)];
-      const dEdges = Math.min(c[0], Math.abs(-E.COS30 * c[0] + E.SIN30 * c[1]), E.closestOnPoly(c, outline).dist);
-      const size = dEdges * rand(0.35, 0.6);
-      if (size < 0.008) continue;
-      const kind = pick(['circle', 'diamond', 'tri']);
-      let pts;
-      if (kind === 'circle') pts = E.circlePts(c[0], c[1], size, 48);
-      else if (kind === 'diamond') pts = [[c[0], c[1] + size], [c[0] + size * 0.6, c[1]], [c[0], c[1] - size], [c[0] - size * 0.6, c[1]]];
-      else pts = [0, 1, 2].map(i => { const a = rand(0, 1) + (i * 2 * Math.PI) / 3; return [c[0] + size * Math.cos(a), c[1] + size * Math.sin(a)]; });
-      strokes.push({ id: id(), pts, closed: true });
-    }
-
-    if (R() < 0.35) strokes.push({ id: id(), pts: E.circlePts(0, 0, rand(0.03, 0.07), 48), closed: true });
-    return strokes;
-  }
-
-  function surprise() {
-    const shapes = ['flat', 'flat', 'point', 'star', 'round'];
-    const trim = { shape: shapes[Math.floor(Math.random() * shapes.length)], size: 0.92 };
-    const seed = Math.floor(Math.random() * 1e9);
-    store.keepSeeds = [];
-    store.commit(generate(seed, trim), trim);
-    store.state.word = { ...store.state.word, text: '' };
-    syncWordUI(); save();
-  }
-
   // -------------------------------------------------------------- SVG import
   function importSVG(text) {
     const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
@@ -641,12 +551,9 @@
 
   // ---------------------------------------------------------------- UI wiring
   load();
-  if (!store.state.strokes.length && !localStorage.getItem(STORAGE_KEY)) {
-    store.state.strokes = generate(20261117, store.state.trim);
-  }
 
   const editor = new Editor($('#editor'), store);
-  window.snowflaker = { store, editor, generate };   // handy for tinkering in devtools
+  window.snowflaker = { store, editor };   // handy for tinkering in devtools
 
   function setToolUI(t) {
     $$('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
@@ -820,7 +727,6 @@
   $('#btn-sketch-cut').addEventListener('click', sketchToCuts);
   $('#opt-show-sketch').addEventListener('change', e => { editor.showSketch = e.target.checked; editor.render(); });
   $('#opt-sketch').addEventListener('change', e => { store.view.sketch = e.target.checked; save(); drawFinal(); });
-  $('#btn-surprise').addEventListener('click', surprise);
   $('#opt-snap').addEventListener('change', e => { editor.snap = e.target.checked; });
   $('#opt-mirror').addEventListener('change', e => { editor.showGhosts = e.target.checked; editor.render(); });
 
